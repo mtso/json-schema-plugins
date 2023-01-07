@@ -6,38 +6,37 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class Ref {
-    private final String path;
-    private final String fragment;
-    private final boolean isLocalRef;
+  private final String path;
+  private final String fragment;
+  private final boolean isLocalRef;
 
-    public Ref(String refString) throws IOException {
-        final URI uri;
-        try {
-            uri = new URI(refString);
-        } catch (final URISyntaxException e) {
-            throw new IOException(e);
-        }
-
-        if (Objects.isNull(uri.getRawFragment())) {
-            path = refString.replaceFirst("file:", "");
-            fragment = null;
-        } else {
-            path = refString.replaceFirst("file:", "")
-                .replace("#" + uri.getRawFragment(), "");
-            fragment = "#" + uri.getRawFragment();
-        }
-        isLocalRef = path.isEmpty();
+  public Ref(String refString) throws IOException {
+    final URI uri;
+    try {
+      uri = new URI(refString);
+    } catch (final URISyntaxException e) {
+      throw new IOException(e);
     }
 
-    public String getPath() {
-        return path;
+    if (Objects.isNull(uri.getRawFragment())) {
+      path = refString.replaceFirst("file:", "");
+      fragment = null;
+    } else {
+      path = refString.replaceFirst("file:", "").replace("#" + uri.getRawFragment(), "");
+      fragment = "#" + uri.getRawFragment();
     }
+    isLocalRef = path.isEmpty();
+  }
 
-    public String getFragment() {
-        return fragment;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public boolean isLocalRef() {
-        return isLocalRef;
-    }
+  public String getFragment() {
+    return fragment;
+  }
+
+  public boolean isLocalRef() {
+    return isLocalRef;
+  }
 }

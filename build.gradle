@@ -1,6 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'com.diffplug.spotless' version '6.12.1'
 }
 
 repositories {
@@ -19,15 +20,6 @@ gradlePlugin {
     }
 }
 
-publishing {
-    repositories {
-        maven {
-            name = 'localPluginRepository'
-            url = '/Users/matthewt/dev/repo/local-plugin-repository'
-        }
-    }
-}
-
 dependencies {
     api(
         [ group: 'com.networknt', name: 'json-schema-validator', version: '1.0.76'],
@@ -38,4 +30,19 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = 'localPluginRepository'
+            url = '/Users/matthewt/dev/repo/local-plugin-repository'
+        }
+    }
 }
