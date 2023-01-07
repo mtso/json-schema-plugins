@@ -1,0 +1,10 @@
+{
+  "definitions": {
+    "foo": {
+      "$ref": "file:./baz.schema.json#/definitions/baz"
+    },
+    "bar": {
+      "type": "string"
+    }
+  }
+}

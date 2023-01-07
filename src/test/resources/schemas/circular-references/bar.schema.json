@@ -1,0 +1,7 @@
+{
+  "definitions": {
+    "bar": {
+      "$ref": "file:./foo.schema.json#/foo"
+    }
+  }
+}
