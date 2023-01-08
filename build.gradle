@@ -11,9 +11,12 @@ repositories {
 group = 'io.mtso'
 version = '1.0-SNAPSHOT'
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 gradlePlugin {
     plugins {
-        simplePlugin {
+        expanderPlugin {
             id = 'io.mtso.jsonschema.expander'
             implementationClass = 'io.mtso.jsonschema.ExpanderPlugin'
         }

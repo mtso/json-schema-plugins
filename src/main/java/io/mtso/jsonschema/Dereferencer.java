@@ -1,6 +1,7 @@
 package io.mtso.jsonschema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
@@ -38,61 +39,60 @@ public class Dereferencer {
       filepath = rootDirectory.getAbsolutePath() + "/" + path;
     }
     File file = new File(filepath);
+//    task.getLogger().lifecycle(String.format("getJsonSchema %s", file));
     JsonSchema schema = jsonSchemaFactory.getSchema(new FileInputStream(file));
     schemas.put(path, schema);
     return schema;
   }
 
-  public void dereference(JsonNode schema) throws IOException {
-    for (JsonNode node : schema.findParents("$ref")) {
-      if (node.isObject()) {
-        ObjectNode parent = (ObjectNode) node;
+  public JsonNode getJsonSchemaNode(JsonNode root, Ref ref) throws IOException {
+    if (ref.isLocalRef()) {
+      return jsonSchemaFactory.getSchema(root).getRefSchemaNode(ref.getFragment());
 
-        final String refString = node.path("$ref").textValue();
+    } else if (ref.getPath() != null && !ref.getPath().contains("schema")) {
+      String filepath;
+      if (ref.getPath().startsWith("/")) {
+        filepath = ref.getPath();
+      } else {
+        filepath = rootDirectory.getAbsolutePath() + "/" + ref.getPath();
+      }
+      File file = new File(filepath);
+      FileInputStream fis = new FileInputStream(file);
+      return new ObjectMapper().readTree(fis);
+    } else {
+      final JsonSchema schema = getJsonSchema(ref.getPath());
+
+      if (null == ref.getFragment()) {
+        return schema.getSchemaNode();
+      } else {
+        return schema.getRefSchemaNode(ref.getFragment());
+      }
+    }
+  }
+
+  public void dereference(final JsonNode schema) throws IOException {
+    for (final JsonNode node : schema.findParents("$ref")) {
+      if (node.isObject()) {
+        final ObjectNode parent = (ObjectNode) node;
+
+        final String refString = parent.path("$ref").textValue();
+        if (refString == null) {
+//          parent.remove("$ref");
+          continue;
+//          task.getLogger().lifecycle(String.format("why null: %s", node.path("$ref")));
+        }
         final Ref ref = new Ref(refString);
 
-        if (ref.isLocalRef()) {
-          JsonNode schemaNode =
-              jsonSchemaFactory.getSchema(schema).getRefSchemaNode(ref.getFragment());
-          if (schemaNode.isObject()) {
+        final JsonNode schemaNode = getJsonSchemaNode(schema, ref);
 
-            ObjectNode schemaNodeObj = (ObjectNode) schemaNode;
-
-            dereference(schemaNodeObj);
-
-            parent.remove("$ref");
-
-            Iterator<String> names = schemaNodeObj.fieldNames();
-            while (names.hasNext()) {
-              String name = names.next();
-              parent.set(name, schemaNodeObj.get(name));
-            }
-          }
-          continue;
-        }
-
-        final JsonSchema schema1 = getJsonSchema(ref.getPath());
-
-        //                task.getLogger().lifecycle(String.format("getting root=%s schema=%s
-        // fragment=%s", schema, schema1, ref.getFragment()));
-        JsonNode schemaNode;
-        if (null == ref.getFragment()) {
-          schemaNode = schema1.getSchemaNode();
-        } else {
-          schemaNode = schema1.getRefSchemaNode(ref.getFragment());
-        }
-
-        if (schemaNode.isObject()) {
-
-          ObjectNode schemaNodeObj = (ObjectNode) schemaNode;
-
+        if (schemaNode != null && schemaNode.isObject()) {
+          final ObjectNode schemaNodeObj = (ObjectNode) schemaNode;
           dereference(schemaNodeObj);
 
           parent.remove("$ref");
-
-          Iterator<String> names = schemaNodeObj.fieldNames();
+          final Iterator<String> names = schemaNodeObj.fieldNames();
           while (names.hasNext()) {
-            String name = names.next();
+            final String name = names.next();
             parent.set(name, schemaNodeObj.get(name));
           }
         }

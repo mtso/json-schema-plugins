@@ -10,10 +10,19 @@ public class Ref {
   private final String fragment;
   private final boolean isLocalRef;
 
+  public static String escape(String str) {
+    if (null == str) {
+      return null;
+    }
+    return str
+        .replaceAll("\\{",  "%7B")
+        .replaceAll("}",  "%7D");
+  }
+
   public Ref(String refString) throws IOException {
     final URI uri;
     try {
-      uri = new URI(refString);
+      uri = new URI(escape(refString));
     } catch (final URISyntaxException e) {
       throw new IOException(e);
     }
