@@ -7,15 +7,12 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
-
 import org.gradle.api.GradleScriptException;
-import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileVisitDetails;
@@ -51,7 +48,7 @@ public class SchemaDirectoryVisitor implements FileVisitor {
     try {
       data = new String(Files.readAllBytes(fileVisitDetails.getFile().toPath()));
     } catch (final IOException e) {
-      throw new GradleScriptException("Failed to read data", e);// + e.getMessage());
+      throw new GradleScriptException("Failed to read data", e); // + e.getMessage());
     }
 
     JsonNode schemaNode;
@@ -61,7 +58,6 @@ public class SchemaDirectoryVisitor implements FileVisitor {
       task.getLogger()
           .lifecycle(String.format("expanding schema %s", fileVisitDetails.getFile().toPath()));
 
-
       JsonSchema schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(data);
       schemaNode = schema.getSchemaNode();
       try {
@@ -70,28 +66,26 @@ public class SchemaDirectoryVisitor implements FileVisitor {
       } catch (final IOException e) {
         throw new GradleScriptException("Failed to dereference", e);
       }
-    } else {// if (fileVisitDetails.getFile().getPath().endsWith(".json")) {
+    } else { // if (fileVisitDetails.getFile().getPath().endsWith(".json")) {
 
       task.getLogger()
           .lifecycle(String.format("copying file %s", fileVisitDetails.getFile().toPath()));
-
-
 
       try {
         schemaNode = new ObjectMapper().readTree(data);
       } catch (final IOException e) {
         throw new GradleScriptException("failed to read json file", e);
       }
-//    } else {
+      //    } else {
       // write as regular file
     }
 
     try {
-//      new ObjectMapper().writer .writerWithDefaultPrettyPrinter().write
-//      String result =
-//          new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(schemaNode);
-      byte[] b =
-          new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(schemaNode);
+      //      new ObjectMapper().writer .writerWithDefaultPrettyPrinter().write
+      //      String result =
+      //          new
+      // ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(schemaNode);
+      byte[] b = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(schemaNode);
       Path path =
           intoFile.toPath().resolve(Paths.get(fileVisitDetails.getRelativePath().getPathString()));
 

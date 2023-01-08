@@ -3,8 +3,6 @@ package io.mtso.jsonschema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import java.io.File;
-
-import org.gradle.api.GradleScriptException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -24,11 +22,13 @@ public class ExpanderPlugin implements Plugin<Project> {
               task.getLogger().lifecycle("io.mtso.expander");
               FileTree tree = extension.getFrom().get().getAsFileTree();
               if (tree.isEmpty()) {
-                  throw new InvalidUserDataException("'from' directory is empty: " + extension.getFrom().getAsFile());
+                throw new InvalidUserDataException(
+                    "'from' directory is empty: " + extension.getFrom().getAsFile());
               }
 
-//              task.getLogger().lifecycle(String.format("what? %s", extension.getFrom().get()));
-//              extension.getFrom().get().getAsFile();
+              //              task.getLogger().lifecycle(String.format("what? %s",
+              // extension.getFrom().get()));
+              //              extension.getFrom().get().getAsFile();
               File intoFile = extension.getInto().get().getAsFile();
               project.mkdir(intoFile);
 
@@ -37,7 +37,6 @@ public class ExpanderPlugin implements Plugin<Project> {
                       extension.getFrom().get().getAsFile(),
                       JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4),
                       task);
-
 
               tree.visit(new SchemaDirectoryVisitor(dereferencer, task, intoFile, project));
             });

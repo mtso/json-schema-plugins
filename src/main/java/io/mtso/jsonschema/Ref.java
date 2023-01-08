@@ -14,9 +14,7 @@ public class Ref {
     if (null == str) {
       return null;
     }
-    return str
-        .replaceAll("\\{",  "%7B")
-        .replaceAll("}",  "%7D");
+    return str.replaceAll("\\{", "%7B").replaceAll("}", "%7D");
   }
 
   public Ref(String refString) throws IOException {

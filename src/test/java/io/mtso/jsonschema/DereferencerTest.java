@@ -14,6 +14,6 @@ public class DereferencerTest {
         new Dereferencer(null, JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4), null);
     final ObjectNode schemaNode = JsonNodeFactory.instance.objectNode();
     schemaNode.put("type", "string");
-    dereferencer.dereference(schemaNode);
+    dereferencer.dereference2(schemaNode);
   }
 }
