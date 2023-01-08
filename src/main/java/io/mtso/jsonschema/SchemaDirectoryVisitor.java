@@ -66,7 +66,7 @@ public class SchemaDirectoryVisitor implements FileVisitor {
       schemaNode = schema.getSchemaNode();
       try {
         dereferencer.schemas = new HashMap<>();
-        dereferencer.dereference(schemaNode);
+        schemaNode = dereferencer.dereference2(schemaNode);
       } catch (final IOException e) {
         throw new GradleScriptException("Failed to dereference", e);
       }
