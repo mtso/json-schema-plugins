@@ -7,67 +7,77 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import org.gradle.api.GradleScriptException;
-import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.file.FileVisitor;
 
 public class SchemaDirectoryVisitor implements FileVisitor {
-  Dereferencer dereferencer;
-  Task task;
-  File intoFile;
-  Project project;
+  private final Dereferencer dereferencer;
+  private final Task task;
+  private final File intoFile;
+  private final GenerateExtension extension;
 
   public SchemaDirectoryVisitor(
-      Dereferencer dereferencer, Task task, File intoFile, Project project) {
+      final Dereferencer dereferencer,
+      final Task task,
+      final File intoFile,
+      final GenerateExtension extension) {
     this.dereferencer = dereferencer;
     this.task = task;
     this.intoFile = intoFile;
-    this.project = project;
+    this.extension = extension;
   }
 
   @Override
-  public void visitDir(FileVisitDetails fileVisitDetails) {}
+  public void visitDir(final FileVisitDetails fileVisitDetails) {}
 
   @Override
-  public void visitFile(FileVisitDetails fileVisitDetails) {
+  public void visitFile(final FileVisitDetails fileVisitDetails) {
     if (!fileVisitDetails.getName().endsWith(".json")) {
       return;
     }
-    if (fileVisitDetails.getFile().getPath().contains("endpoints/shared/")) {
+
+    final boolean anyExcluded =
+        extension.getExcludes().stream()
+            .anyMatch(
+                pattern ->
+                    FileSystems.getDefault()
+                        .getPathMatcher("glob:" + pattern)
+                        .matches(fileVisitDetails.getFile().toPath()));
+
+    if (anyExcluded) {
       return;
     }
 
-    String data;
+    final String data;
     try {
       data = new String(Files.readAllBytes(fileVisitDetails.getFile().toPath()));
     } catch (final IOException e) {
-      throw new GradleScriptException("Failed to read data", e); // + e.getMessage());
+      throw new GradleScriptException("Failed to read data", e);
     }
 
-    JsonNode schemaNode;
+    final JsonNode schemaNode;
 
     if (fileVisitDetails.getFile().getPath().endsWith("schema.json")) {
-
       task.getLogger()
           .lifecycle(String.format("expanding schema %s", fileVisitDetails.getFile().toPath()));
 
-      JsonSchema schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(data);
-      schemaNode = schema.getSchemaNode();
+      final JsonSchema schema =
+          JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(data);
+
       try {
-        dereferencer.schemas = new HashMap<>();
-        schemaNode = dereferencer.dereference2(schemaNode);
+        schemaNode = dereferencer.dereference(schema.getSchemaNode());
       } catch (final IOException e) {
         throw new GradleScriptException("Failed to dereference", e);
       }
-    } else { // if (fileVisitDetails.getFile().getPath().endsWith(".json")) {
 
+    } else {
       task.getLogger()
           .lifecycle(String.format("copying file %s", fileVisitDetails.getFile().toPath()));
 
@@ -76,28 +86,18 @@ public class SchemaDirectoryVisitor implements FileVisitor {
       } catch (final IOException e) {
         throw new GradleScriptException("failed to read json file", e);
       }
-      //    } else {
-      // write as regular file
     }
 
     try {
-      //      new ObjectMapper().writer .writerWithDefaultPrettyPrinter().write
-      //      String result =
-      //          new
-      // ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(schemaNode);
-      byte[] b = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(schemaNode);
-      Path path =
+      final byte[] b =
+          new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(schemaNode);
+      final Path path =
           intoFile.toPath().resolve(Paths.get(fileVisitDetails.getRelativePath().getPathString()));
 
-      //            task.getLogger().lifecycle(String.format("parent %s", path.getParent()));
-      //            task.getLogger().lifecycle(String.format("writing %s", path));
-
-      project.mkdir(path.getParent());
+      task.getProject().mkdir(path.getParent());
       Files.write(path, b, StandardOpenOption.CREATE);
     } catch (final IOException e) {
       throw new GradleScriptException("Failed to write file", e);
     }
-    //        task.getLogger().lifecycle(String.format("visited %s", schemaNode));
-
   }
 }

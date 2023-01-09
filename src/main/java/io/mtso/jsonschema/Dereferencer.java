@@ -2,31 +2,31 @@ package io.mtso.jsonschema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.gradle.api.Task;
 
 public class Dereferencer {
-  Map<String, JsonSchema> schemas = new HashMap<>();
-  Map<String, JsonNode> jsonFiles = new HashMap<>();
-  File rootDirectory;
-  JsonSchemaFactory jsonSchemaFactory;
-  Task task;
+  private final Map<String, JsonNode> jsonFiles = new HashMap<>();
+  private final File rootDirectory;
+  private final JsonSchemaFactory jsonSchemaFactory;
+  private final Task task;
 
-  public Dereferencer(File rootDirectory, JsonSchemaFactory jsonSchemaFactory, Task task) {
+  public Dereferencer(
+      final File rootDirectory, final JsonSchemaFactory jsonSchemaFactory, final Task task) {
     this.rootDirectory = rootDirectory;
     this.jsonSchemaFactory = jsonSchemaFactory;
     this.task = task;
   }
 
-  public static JsonNode digRef(JsonNode root, String ref) {
+  public static JsonNode digRef(final JsonNode root, final String ref) {
     JsonNode curr = root;
-    String[] parts = ref.split("/");
+    final String[] parts = ref.split("/");
     int partIdx = 0;
     while (partIdx < parts.length) {
       String part = parts[partIdx];
@@ -70,7 +70,7 @@ public class Dereferencer {
         jsonFiles.put(filepath, derefedDataNode);
       }
 
-      if (ref.getFragment() == null) {
+      if (Objects.isNull(ref.getFragment())) {
         return derefedDataNode;
       } else {
         return digRef(derefedDataNode, ref.getFragment());
@@ -78,8 +78,8 @@ public class Dereferencer {
     }
   }
 
-  public JsonNode dereference2(final JsonNode root) throws IOException {
-    RefWalker rw = new RefWalker(this::replaceRef, root);
+  public JsonNode dereference(final JsonNode root) throws IOException {
+    final RefWalker rw = new RefWalker(this::replaceRef, root);
     rw.walk();
     return rw.getJsonNode();
   }

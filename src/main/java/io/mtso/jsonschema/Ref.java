@@ -11,7 +11,7 @@ public class Ref {
   private final boolean isLocalRef;
 
   public static String escape(String str) {
-    if (null == str) {
+    if (Objects.isNull(str)) {
       return null;
     }
     return str.replaceAll("\\{", "%7B").replaceAll("}", "%7D");
