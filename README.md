@@ -14,11 +14,11 @@ De-references JSON schemas in the 'from' directory. And copies the de-referenced
 
 ```groovy
 jsonschema {
-	prepare {
-		from = layout.projectDirectory.dir("schemas/endpoints")
-		into = layout.buildDirectory.dir("expanded-schemas")
-		exclude "**/shared/**"
-	}
+    prepare {
+        from = layout.projectDirectory.dir("schemas/endpoints")
+        into = layout.buildDirectory.dir("expanded-schemas")
+        exclude "**/shared/**"
+    }
 }
 
 compileJava {
