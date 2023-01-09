@@ -8,6 +8,24 @@ plugins {
 }
 ```
 
+### Legacy Install
+
+```groovy
+buildscript {
+    repositories {
+        maven {
+            name = 'localPluginRepository'
+            url System.properties['user.home'] + '/dev/repo/local-plugin-repository'
+        }
+    }
+    dependencies {
+        classpath "io.mtso:jsonschema:1.0-SNAPSHOT"
+    }
+}
+
+apply plugin: 'io.mtso.jsonschema.prepare'
+```
+
 ## Task: `prepareSchemas`
 
 De-references JSON schemas in the 'from' directory. And copies the de-referenced schemas to the 'into' directory.
