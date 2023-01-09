@@ -9,13 +9,13 @@ import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 
 public class PrepareSchemasPlugin implements Plugin<Project> {
-  public static final String JSONSCHEMAS_EXTENSION_NAME = "jsonschemas";
+  public static final String JSONSCHEMA_EXTENSION_NAME = "jsonschema";
   public static final String PREPARE_SCHEMAS_TASK_NAME = "prepareSchemas";
 
   @Override
   public void apply(final Project project) {
-    final JsonschemasExtension extension =
-        project.getExtensions().create(JSONSCHEMAS_EXTENSION_NAME, JsonschemasExtension.class);
+    final JsonschemaExtension extension =
+        project.getExtensions().create(JSONSCHEMA_EXTENSION_NAME, JsonschemaExtension.class);
 
     project
         .task(PREPARE_SCHEMAS_TASK_NAME)

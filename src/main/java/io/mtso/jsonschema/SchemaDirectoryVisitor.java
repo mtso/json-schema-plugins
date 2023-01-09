@@ -21,13 +21,13 @@ public class SchemaDirectoryVisitor implements FileVisitor {
   private final Dereferencer dereferencer;
   private final Task task;
   private final File intoFile;
-  private final GenerateExtension extension;
+  private final PrepareExtension extension;
 
   public SchemaDirectoryVisitor(
       final Dereferencer dereferencer,
       final Task task,
       final File intoFile,
-      final GenerateExtension extension) {
+      final PrepareExtension extension) {
     this.dereferencer = dereferencer;
     this.task = task;
     this.intoFile = intoFile;

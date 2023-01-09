@@ -7,22 +7,22 @@ import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 
-public abstract class GenerateExtension {
+public abstract class PrepareExtension {
   abstract DirectoryProperty getFrom();
 
   private List<String> excludes = new LinkedList<>();
 
   abstract DirectoryProperty getInto();
 
-  private JsonschemasExtension jsonschemasExtension;
+  private JsonschemaExtension jsonschemasExtension;
 
-  public GenerateExtension(Project project) {}
+  public PrepareExtension(Project project) {}
 
   public void from(Directory from) {
     getFrom().set(from);
   }
 
-  public void from(Directory from, Action<GenerateExtension> closure) {
+  public void from(Directory from, Action<PrepareExtension> closure) {
     getFrom().set(from);
     closure.execute(this);
   }

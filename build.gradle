@@ -17,7 +17,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 gradlePlugin {
     plugins {
         prepareSchemasPlugin {
-            id = 'io.mtso.jsonschema.prepareSchemas'
+            id = 'io.mtso.jsonschema.prepare'
             implementationClass = 'io.mtso.jsonschema.PrepareSchemasPlugin'
         }
     }
@@ -49,20 +49,3 @@ publishing {
         }
     }
 }
-
-// Sketch of possible configuration block:
-//prepareSchemas {
-//    jsonSchemaImplementation = 'com.networknt' // or com.github.fge
-//
-//    from layout.buildDirectory.dir("schemas/endpoints")
-//    into layout.buildDirectory.dir("expanded-schemas")
-//
-//    validateJsonSchema {
-//        include "**.schema.json"
-//        exclude "**.openapi.schema.json"
-//    }
-//
-//    deref {
-//        include "**.schema.json"
-//    }
-//}
