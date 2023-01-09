@@ -2,6 +2,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
     id 'com.diffplug.spotless' version '6.12.1'
+    id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
 repositories {
@@ -9,7 +10,7 @@ repositories {
 }
 
 group = 'io.mtso'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -18,16 +19,21 @@ gradlePlugin {
     plugins {
         prepareSchemasPlugin {
             id = 'io.mtso.jsonschema.prepare'
+            displayName = 'JSON Schema preparing plugin'
             implementationClass = 'io.mtso.jsonschema.PrepareSchemasPlugin'
+            description = 'Prepares JSON Schemas by de-referencing local files'
         }
     }
 }
 
-dependencies {
-    api(
-        [ group: 'com.networknt', name: 'json-schema-validator', version: '1.0.76'],
-    )
+pluginBundle {
+    website = 'https://github.com/mtso/json-schema-plugins'
+    vcsUrl = 'https://github.com/mtso/json-schema-plugins.git'
+    tags = ['jsonschema']
+}
 
+dependencies {
+    api group: 'com.networknt', name: 'json-schema-validator', version: '1.0.76'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
 }
 
@@ -45,7 +51,7 @@ publishing {
     repositories {
         maven {
             name = 'localPluginRepository'
-            url = '/Users/matthewt/dev/repo/local-plugin-repository'
+            url = System.properties['user.home'] + '/dev/repo/local-plugin-repository'
         }
     }
 }
