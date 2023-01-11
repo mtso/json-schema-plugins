@@ -66,7 +66,7 @@ public class SchemaDirectoryVisitor implements FileVisitor {
 
     if (fileVisitDetails.getFile().getPath().endsWith("schema.json")) {
       task.getLogger()
-          .lifecycle(String.format("expanding schema %s", fileVisitDetails.getFile().toPath()));
+          .lifecycle(String.format("Expanding %s", fileVisitDetails.getFile().toPath()));
 
       final JsonSchema schema =
           JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(data);
@@ -78,8 +78,7 @@ public class SchemaDirectoryVisitor implements FileVisitor {
       }
 
     } else {
-      task.getLogger()
-          .lifecycle(String.format("copying file %s", fileVisitDetails.getFile().toPath()));
+      task.getLogger().lifecycle(String.format("Copying %s", fileVisitDetails.getFile().toPath()));
 
       try {
         schemaNode = new ObjectMapper().readTree(data);

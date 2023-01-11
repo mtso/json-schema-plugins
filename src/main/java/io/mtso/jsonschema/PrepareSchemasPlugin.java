@@ -21,24 +21,26 @@ public class PrepareSchemasPlugin implements Plugin<Project> {
         .task(PREPARE_SCHEMAS_TASK_NAME)
         .doFirst(
             task -> {
-              final FileTree tree = extension.getGenerate().getFrom().getAsFileTree();
+              final FileTree tree = extension.getPrepare().getFrom().getAsFileTree();
               if (tree.isEmpty()) {
                 throw new InvalidUserDataException(
-                    "'from' directory is empty: " + extension.getGenerate().getFrom().getAsFile());
+                    "'from' directory is empty: " + extension.getPrepare().getFrom().getAsFile());
               }
 
-              final File intoFile = extension.getGenerate().getInto().get().getAsFile();
+              final File intoFile = extension.getPrepare().getInto().get().getAsFile();
               project.mkdir(intoFile);
 
               final Dereferencer dereferencer =
                   new Dereferencer(
-                      extension.getGenerate().getFrom().get().getAsFile(),
+                      extension.getPrepare().getFrom().get().getAsFile(),
                       JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4),
                       task);
 
+              new ExampleValidator(extension.getPrepare().getValidate(), task)
+                  .validateExamples(extension.getPrepare().getFrom().get().getAsFile());
+
               tree.visit(
-                  new SchemaDirectoryVisitor(
-                      dereferencer, task, intoFile, extension.getGenerate()));
+                  new SchemaDirectoryVisitor(dereferencer, task, intoFile, extension.getPrepare()));
             });
   }
 }

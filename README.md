@@ -36,6 +36,16 @@ jsonschema {
         from = layout.projectDirectory.dir("schemas/endpoints")
         into = layout.buildDirectory.dir("expanded-schemas")
         exclude "**/shared/**"
+
+        validate {
+            include "**schema.json"
+            include "**example.*.json"
+            exclude "**openapi.schema.json"
+
+            // Optional, defaults to value below.
+            examplePattern = '^(.*\\.)example\\.[a-zA-Z_\\d]+(\\.json)$'
+            schemaFileExtension = 'schema.json'
+        }
     }
 }
 
