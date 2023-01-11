@@ -4,31 +4,17 @@
 
 ```groovy
 plugins {
-    id 'io.mtso.jsonschema.prepare'
+    id 'io.mtso.jsonschema.prepare' version '1.1.0'
 }
 ```
 
-### Legacy Install
-
-```groovy
-buildscript {
-    repositories {
-        maven {
-            name = 'localPluginRepository'
-            url System.properties['user.home'] + '/dev/repo/local-plugin-repository'
-        }
-    }
-    dependencies {
-        classpath "io.mtso:jsonschema:1.0-SNAPSHOT"
-    }
-}
-
-apply plugin: 'io.mtso.jsonschema.prepare'
-```
+See: https://plugins.gradle.org/plugin/io.mtso.jsonschema.prepare
 
 ## Task: `prepareSchemas`
 
 De-references JSON schemas in the 'from' directory. And copies the de-referenced schemas to the 'into' directory.
+
+### `build.gradle` Configuration
 
 ```groovy
 jsonschema {
@@ -52,4 +38,26 @@ jsonschema {
 compileJava {
     dependsOn prepareSchemas
 }
+```
+
+## Development
+
+Set version in `build.gradle` to `9999-SNAPSHOT`. Then run: `./gradlew publish`
+to publish the plugin to the local plugin repository.
+
+In the local using project, add this to `build.gradle`:
+```groovy
+buildscript {
+    repositories {
+        maven {
+            name = 'localPluginRepository'
+            url System.properties['user.home'] + '/dev/repo/local-plugin-repository'
+        }
+    }
+    dependencies {
+        classpath "io.mtso:jsonschema:9999-SNAPSHOT"
+    }
+}
+
+apply plugin: 'io.mtso.jsonschema.prepare'
 ```
