@@ -1,12 +1,8 @@
 package io.mtso.jsonschema;
 
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import java.io.File;
-import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.file.FileTree;
+import org.gradle.api.tasks.TaskProvider;
 
 public class PrepareSchemasPlugin implements Plugin<Project> {
   public static final String JSONSCHEMA_EXTENSION_NAME = "jsonschema";
@@ -17,28 +13,34 @@ public class PrepareSchemasPlugin implements Plugin<Project> {
     final JsonschemaExtension extension =
         project.getExtensions().create(JSONSCHEMA_EXTENSION_NAME, JsonschemaExtension.class);
 
-    project
-        .task(PREPARE_SCHEMAS_TASK_NAME)
-        .doFirst(
-            task -> {
-              final FileTree tree = extension.getGenerate().getFrom().getAsFileTree();
-              if (tree.isEmpty()) {
-                throw new InvalidUserDataException(
-                    "'from' directory is empty: " + extension.getGenerate().getFrom().getAsFile());
-              }
+    final TaskProvider<PrepareSchemasTask> task =
+        project.getTasks().register(PREPARE_SCHEMAS_TASK_NAME, PrepareSchemasTask.class);
 
-              final File intoFile = extension.getGenerate().getInto().get().getAsFile();
-              project.mkdir(intoFile);
+    project.afterEvaluate(
+        (p) -> {
+          task.configure(
+              (t) -> {
+                t.getPrepare().getFrom().set(extension.getPrepare().getFrom());
+                t.getPrepare().getInto().set(extension.getPrepare().getInto());
+                t.getPrepare().getExcludes().addAll(extension.getPrepare().getExcludes());
 
-              final Dereferencer dereferencer =
-                  new Dereferencer(
-                      extension.getGenerate().getFrom().get().getAsFile(),
-                      JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4),
-                      task);
-
-              tree.visit(
-                  new SchemaDirectoryVisitor(
-                      dereferencer, task, intoFile, extension.getGenerate()));
-            });
+                t.getPrepare()
+                    .getValidate()
+                    .getExamplePattern()
+                    .set(extension.getPrepare().getValidate().getExamplePattern());
+                t.getPrepare()
+                    .getValidate()
+                    .getSchemaFileExtension()
+                    .set(extension.getPrepare().getValidate().getSchemaFileExtension());
+                t.getPrepare()
+                    .getValidate()
+                    .getIncludes()
+                    .addAll(extension.getPrepare().getValidate().getIncludes());
+                t.getPrepare()
+                    .getValidate()
+                    .getExcludes()
+                    .addAll(extension.getPrepare().getValidate().getExcludes());
+              });
+        });
   }
 }

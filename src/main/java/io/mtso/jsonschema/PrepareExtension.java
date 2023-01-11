@@ -2,21 +2,31 @@ package io.mtso.jsonschema;
 
 import java.util.LinkedList;
 import java.util.List;
+import javax.inject.Inject;
 import org.gradle.api.Action;
-import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.api.tasks.SkipWhenEmpty;
 
 public abstract class PrepareExtension {
+  @Internal private final List<String> excludes = new LinkedList<>();
+
+  @InputDirectory
+  @SkipWhenEmpty
+  @PathSensitive(PathSensitivity.RELATIVE)
   abstract DirectoryProperty getFrom();
 
-  private List<String> excludes = new LinkedList<>();
-
+  @OutputDirectory
   abstract DirectoryProperty getInto();
 
-  private JsonschemaExtension jsonschemasExtension;
-
-  public PrepareExtension(Project project) {}
+  @Inject
+  public PrepareExtension() {}
 
   public void from(Directory from) {
     getFrom().set(from);
@@ -37,5 +47,12 @@ public abstract class PrepareExtension {
 
   public List<String> getExcludes() {
     return excludes;
+  }
+
+  @Nested
+  public abstract ValidateExtension getValidate();
+
+  public void validate(Action<? super ValidateExtension> action) {
+    action.execute(getValidate());
   }
 }
