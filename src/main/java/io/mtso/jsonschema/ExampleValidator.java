@@ -2,7 +2,6 @@ package io.mtso.jsonschema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.JsonSchema;
@@ -84,31 +83,24 @@ public class ExampleValidator {
     }
   }
 
-  static ArrayNode formatReport(
+  static List<ObjectNode> formatReport(
       @Nonnull final Set<ValidationMessage> report, @Nonnull final JsonNode context) {
     return report.stream()
         .map(
             (vm) -> {
-              try {
-                final JsonNode value = JsonPath.get(context, vm.getPath());
-                final ObjectNode obj = JsonNodeFactory.instance.objectNode();
-                obj.set("value", value);
-                obj.put("type", vm.getType());
-                obj.put("code", vm.getCode());
-                obj.put("path", vm.getPath());
-                obj.put("schemaPath", vm.getSchemaPath());
-                obj.set("arguments", JsonNodeFactory.instance.pojoNode(vm.getArguments()));
-                obj.set("details", JsonNodeFactory.instance.pojoNode(vm.getDetails()));
-                obj.put("message", vm.getMessage());
-                return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
+              final JsonNode value = JsonPath.get(context, vm.getPath());
+              final ObjectNode obj = JsonNodeFactory.instance.objectNode();
+              obj.set("value", value);
+              obj.put("type", vm.getType());
+              obj.put("code", vm.getCode());
+              obj.put("path", vm.getPath());
+              obj.put("schemaPath", vm.getSchemaPath());
+              obj.set("arguments", JsonNodeFactory.instance.pojoNode(vm.getArguments()));
+              obj.set("details", JsonNodeFactory.instance.pojoNode(vm.getDetails()));
+              obj.put("message", vm.getMessage());
+              return obj;
             })
-        .collect(
-            () -> JsonNodeFactory.instance.arrayNode(report.size()),
-            ArrayNode::add,
-            ArrayNode::addAll);
+        .collect(Collectors.toList());
   }
 
   private void validateJsonFilesOrDie(
@@ -120,7 +112,7 @@ public class ExampleValidator {
           JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)
               .getSchema(new FileInputStream(schemaPath.toFile()));
     } catch (IOException e) {
-      throw new RuntimeException("WHAT", e);
+      throw new RuntimeException("Failed to read schema file", e);
     }
 
     final Map<Path, JsonNode> exampleFilePathToJsonMap = new HashMap<>();
@@ -148,9 +140,9 @@ public class ExampleValidator {
         (filePath, json) -> {
           try {
             task.getLogger().lifecycle("Validating example JSON file: " + filePath);
-            Set<ValidationMessage> report = jsonSchema.validate(json);
+            final Set<ValidationMessage> report = jsonSchema.validate(json);
             if (!report.isEmpty()) {
-              final ArrayNode formattedReport = formatReport(report, json);
+              final List<ObjectNode> formattedReport = formatReport(report, json);
               final String result =
                   new ObjectMapper()
                       .writerWithDefaultPrettyPrinter()

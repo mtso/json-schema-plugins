@@ -2,19 +2,24 @@ package io.mtso.jsonschema;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.gradle.api.Project;
+import javax.inject.Inject;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 
 public abstract class ValidateExtension {
 
+  @Internal
   public abstract Property<String> getExamplePattern();
 
+  @Internal
   public abstract Property<String> getSchemaFileExtension();
 
-  private final List<String> includes = new LinkedList<>();
-  private final List<String> excludes = new LinkedList<>();
+  @Internal private final List<String> includes = new LinkedList<>();
 
-  public ValidateExtension(Project project) {}
+  @Internal private final List<String> excludes = new LinkedList<>();
+
+  @Inject
+  public ValidateExtension() {}
 
   public void include(String pattern) {
     this.includes.add(pattern);
